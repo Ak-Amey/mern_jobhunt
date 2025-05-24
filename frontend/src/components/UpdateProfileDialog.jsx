@@ -53,19 +53,26 @@ export const UpdateProfileDialog = ({ open, setOpen }) => {
     }
 
     try{
+      setLoading(true);
+      console.log('API Endpoint:', `${USER_API_END_POINT}/profile/update`);
         const res= await axios.post(`${USER_API_END_POINT}/profile/update`,formData,{
             headers:{
                 'Content-Type':'multipart/form-data'
             },
             withCredentials:true
         });
-        if(res.data.success){
-            dispatch(setUser(res.data.user));
-            toast.success(res.data.message);
+        console.log(res);
+        
+        if(res?.data?.success){
+            dispatch(setUser(res?.data?.user));
+            toast.success(res?.data?.message);
         }
     }catch(e){
         console.log(e);
-        toast.error(e.response.data.message)
+        toast.error(e?.response?.data?.message)
+    }
+    finally{
+      setLoading(false);
     }
     setOpen(false);
     console.log(input);
