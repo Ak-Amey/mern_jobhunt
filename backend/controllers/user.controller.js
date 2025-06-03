@@ -14,11 +14,13 @@ export const register = async (req, res) => {
       });
     }
 
-    const file=req.file;
     var cloudResponse;
-    if(file){
-      const fileUri = getDataUri(file);
-      cloudResponse = await cloudinary.uploader.upload(fileUri.content)
+    const file = req.file;
+    if (!file) {
+      if (file) {
+        const fileUri = getDataUri(file);
+        cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+      }
     }
 
     const user = await User.findOne({ email });
@@ -31,15 +33,16 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    var profileUrl = cloudResponse?.secure_url ?? null;
     await User.create({
       fullname,
       email,
       phoneNumber,
       password: hashedPassword,
       role,
-      profile:{
-        profilePhoto:cloudResponse.secure_url,
-      }
+      profile: {
+        profilePhoto: profileUrl,
+      },
     });
 
     return res.status(201).json({
@@ -131,13 +134,12 @@ export const updateProfile = async (req, res) => {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
     //cloudinary
     const file = req.file;
-    var cloudResponse = null
-    if(file){
+    var cloudResponse = null;
+    if (file) {
       const fileUri = getDataUri(file);
       cloudResponse = await cloudinary.uploader.upload(fileUri.content);
     }
     console.log(cloudResponse);
-    
 
     let skillsArray;
     if (skills) {
@@ -161,9 +163,9 @@ export const updateProfile = async (req, res) => {
     if (skills) user.profile.skills = skillsArray;
 
     //resume
-    if(cloudResponse){
-        user.profile.resume = cloudResponse?.secure_url //save the cloudinary url
-        user.profile.resumeOriginalName = file?.originalname //save the original file name
+    if (cloudResponse) {
+      user.profile.resume = cloudResponse?.secure_url; //save the cloudinary url
+      user.profile.resumeOriginalName = file?.originalname; //save the original file name
     }
 
     await user.save();

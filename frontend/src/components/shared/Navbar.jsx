@@ -11,24 +11,24 @@ import axios from "axios";
 import { setUser } from "../../redux/authSlice";
 
 export const Navbar = () => {
-    const {user}=useSelector(store=>store.auth);
-    const dispatch = useDispatch();
-    const navigate= useNavigate();
-    const logOutHandler = async()=>{
-      try{
-        const res= await axios.get(`${USER_API_END_POINT}/logout`,{
-          withCredentials:true
-        })
-       if(res.data.success){
-        dispatch(setUser(null))
-        navigate("/")
-        toast.success(res.data.message)
-       }
-      }catch(err){
-        console.log(err);
-        toast.error(err.response.data.message)
+  const { user } = useSelector((store) => store.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const logOutHandler = async () => {
+    try {
+      const res = await axios.get(`${USER_API_END_POINT}/logout`, {
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        dispatch(setUser(null));
+        navigate("/");
+        toast.success(res.data.message);
       }
+    } catch (err) {
+      console.log(err);
+      toast.error(err.response.data.message);
     }
+  };
 
   return (
     <div className="bg-white">
@@ -40,60 +40,98 @@ export const Navbar = () => {
         </div>
         <div className="flex items-center gap-12">
           <ul className="flex font-medium items-center gap-5">
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/jobs">Jobs</Link></li>
-            <li><Link to="/browse">Browse</Link></li>
+            {user && user.role === "recruiter" ? (
+              <>
+                <li>
+                  <Link to="/admin/companies">Companies</Link>
+                </li>
+                <li>
+                  <Link to="/admin/jobs">Jobs</Link>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link to="/">Home</Link>
+                </li>
+                <li>
+                  <Link to="/jobs">Jobs</Link>
+                </li>
+                <li>
+                  <Link to="/browse">Browse</Link>
+                </li>
+              </>
+            )}
           </ul>
-          {
-            !user ? (
-                <div className="flex items-center gap-2">
-                    <Link to="/login"><Button variant="outline" className="cursor-pointer">Login</Button></Link>
-                    <Link to="/signup"><Button className="bg-[#6A3BC2] hover:bg-[#5b30a6] cursor-pointer">SignUp</Button></Link>
-                </div>
-            ) :
-            (
-                <Popover>
-            <PopoverTrigger aschild>
-              <Avatar className="cursor-pointer">
-                <AvatarImage
-                  src={user?.profile?.profilePhoto}
-                  alt="@shadcn"
-                />
-              </Avatar>
-            </PopoverTrigger>
-            <PopoverContent className="w-88">
-              <div className="">
+          {!user ? (
+            <div className="flex items-center gap-2">
+              <Link to="/login">
+                <Button variant="outline" className="cursor-pointer">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/signup">
+                <Button className="bg-[#6A3BC2] hover:bg-[#5b30a6] cursor-pointer">
+                  SignUp
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <Popover>
+              <PopoverTrigger aschild>
                 <Avatar className="cursor-pointer">
                   <AvatarImage
-                    src={user?.profile?.profilePhoto}
+                    src={
+                      user?.profile?.profilePhoto
+                        ? user.profile.profilePhoto
+                        : "https://th.bing.com/th/id/OIP.YUggaE09mu25UYFxl-BLjQAAAA?w=197&h=198&c=7&r=0&o=5&pid=1.7"
+                    }
                     alt="@shadcn"
                   />
                 </Avatar>
-                <div>
-                  <h4 className="font-medium">Patel MernStack</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit!
-                  </p>
+              </PopoverTrigger>
+              <PopoverContent className="w-88">
+                <div className="">
+                  <Avatar className="cursor-pointer">
+                    <AvatarImage
+                      src={
+                        user?.profile?.profilePhoto
+                          ? user.profile.profilePhoto
+                          : "https://th.bing.com/th/id/OIP.YUggaE09mu25UYFxl-BLjQAAAA?w=197&h=198&c=7&r=0&o=5&pid=1.7"
+                      }
+                      alt="@shadcn"
+                    />
+                  </Avatar>
+                  <div>
+                    <h4 className="font-medium">Patel MernStack</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit!
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col my-2 text-gray-600">
-                <div className="flex w-fit items-center gap-2 cursor-pointer">
-                  <User2 />
-                  <Button variant="link" className="cursor-pointer">
-                    <Link to="/profile">View Profile</Link>
-                  </Button>
+                <div className="flex flex-col my-2 text-gray-600">
+                  {user && user?.role === "student" && (
+                    <div className="flex w-fit items-center gap-2 cursor-pointer">
+                      <User2 />
+                      <Button variant="link" className="cursor-pointer">
+                        <Link to="/profile">View Profile</Link>
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex w-fit items-center gap-2 cursor-pointer">
+                    <LogOutIcon />
+                    <Button
+                      onClick={logOutHandler}
+                      variant="link"
+                      className="cursor-pointer"
+                    >
+                      Logout
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex w-fit items-center gap-2 cursor-pointer">
-                  <LogOutIcon/>
-                  <Button onClick={logOutHandler} variant="link" className="cursor-pointer">
-                    Logout
-                  </Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-            )
-          }
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
       </div>
     </div>
